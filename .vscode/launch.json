@@ -1,0 +1,32 @@
+{
+"version": "0.2.0",
+"configurations": [
+{
+"name": "Python Conda: Current File",
+"type": "debugpy",
+"request": "launch",
+"program": "${file}",
+"console": "integratedTerminal",
+"python": "C:/Program Files/Python311/python.exe",
+"justMyCode": false
+},
+{
+"name": "Python Debugger: Current File",
+"type": "debugpy",
+"request": "launch",
+"program": "${file}",
+"console": "integratedTerminal",
+"python": "/Users/roman/Documents/roman3-11venv/bin/python3",
+"justMyCode": false
+},
+{
+      "name": "Python Debug read crypto tseries",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "database.insert_db",
+      "console": "integratedTerminal",
+      "python": "C:/Program Files/Python311/python.exe"
+ }
+]
+}
+
