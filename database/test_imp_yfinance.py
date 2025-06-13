@@ -3,6 +3,6 @@ import datetime as d
 
 
 symbol = 'Microsoft'
-period = '1m'
+period = '1mo'
 startPoint = '01.01.2025'
 get_yfinance_data(symbol, period, startPoint)

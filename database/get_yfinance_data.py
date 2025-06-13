@@ -11,6 +11,16 @@ def  get_yfinance_data(symbol, period, startPoint):
     dat.option_chain(dat.options[0]).calls
 
     pfinancials = dat.financials
-    print(pfinancials)
+
+    #print(pfinancials)
+
+    print(dat.history(period=period))
+
+    data = yf.download(list(dat), group_by='column', period=period, interval='1d')
+
+    print(data)
+    #print(data['Open'])
+
+    
 
     
