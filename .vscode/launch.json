@@ -26,6 +26,31 @@
       "module": "database.insert_db",
       "console": "integratedTerminal",
       "python": "C:/Program Files/Python311/python.exe"
+ },
+ {
+      "name": "Python Debug pandas test",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pandas_test",
+      "console": "integratedTerminal",
+      "python": "C:/Program Files/Python311/python.exe"
+ },
+ {
+      "name": "Python Debug numpy test",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "numpy_test",
+      "console": "integratedTerminal",
+      "python": "C:/Program Files/Python311/python.exe"
+ }
+ ,
+ {
+      "name": "Python Debug yfinance test",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "database.test_imp_yfinance",
+      "console": "integratedTerminal",
+      "python": "C:/Program Files/Python311/python.exe"
  }
 ]
 }

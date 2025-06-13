@@ -1,7 +1,4 @@
-from database.db import backtest_db 
+f = open("C:\BckUp\Python\test.txt")
 
-backtest_db.connect()
-
-
-backtest_db.close()
+print(f.read())
 
