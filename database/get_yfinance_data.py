@@ -26,9 +26,13 @@ def  get_yfinance_data(symbol, period, startPoint):
 
     #data.to_csv (r'C:\BckUp\Python\finance.csv', index = None, header=True) 
 
+    #conn = sqlite3.connect('backtest.db')
+    #data.to_sql('finance', conn, if_exists='replace')
+
+    
     conn = sqlite3.connect('backtest.db')
-    data.to_sql('finance', conn, if_exists='replace')
-
+    data.to_sql('finance_imp', conn, if_exists='replace')
     
-
-    
+    #cursor = backtest_db.cursor()
+    #cursor.execute("""Insert into finance [feldliste] select [feldliste]  from finance_imp t1 where not exists (select [key] from finance t2 where t1.[key] = t2.[key] """)
+    #cursor.fetchone()
