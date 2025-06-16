@@ -36,3 +36,19 @@ def  get_yfinance_data(symbol, period, startPoint):
     #cursor = backtest_db.cursor()
     #cursor.execute("""Insert into finance [feldliste] select [feldliste]  from finance_imp t1 where not exists (select [key] from finance t2 where t1.[key] = t2.[key] """)
     #cursor.fetchone()
+
+
+
+import yfinance as yf
+import sqlite3 
+
+ticker= "MSFT"
+interval= "1d"
+period= "1y"
+
+data = yf.download(ticker, interval=interval, period=period)
+
+conn=sqlite3.connect('backtest.db')
+data.to_sql('test_ahm', conn, if_exists='replace')
+
+#schleife erstellen jeweils 7 Tage bis ende des Jahres. Eine Tabelle komplette Tabelle erstellen( concat oder extend). Überprüfen, ob SQL light fähig ist eine immense Zahl an Daten aufzunehmen. 
