@@ -1,1 +1,7 @@
 msksksk
+
+PyYAML==6.0.2
+
+pandas==2.3.0
+
+#pip install -r test.txt

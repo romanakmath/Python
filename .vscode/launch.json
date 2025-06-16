@@ -20,7 +20,7 @@
 "justMyCode": false
 },
 {
-      "name": "Python Debug read crypto tseries",
+      "name": "Python Debug insert db",
       "type": "debugpy",
       "request": "launch",
       "module": "database.insert_db",
