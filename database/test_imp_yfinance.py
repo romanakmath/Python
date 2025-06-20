@@ -32,6 +32,9 @@ db_aktion = 'replace'
 stock_data = pyt.PyTickerSymbols()
 german_stocks = stock_data.get_stocks_by_index('DAX')
 
+for stock in german_stocks:
+    print(stock['symbol'])
+
 
 print(list(german_stocks))
 transfer_start = "2024-08-06"
@@ -76,10 +79,16 @@ conn.close
 
 transfer_end = end
 
-# sql="delete from test_ahm where symbol in (""MSFT"", ""AAPL"")"
-# cursor = backtest_db.cursor()
-# cursor.execute(sql)
-# cursor.close()
+sql="Insert into crypto_tseries (symbol, date,  close, high, low, open, volume) "\
+    "select t1.\"SYMBOL\", t1.\"Datetime\", t1.\"Close\", t1.\"High\", t1.\"Low\", t1.\"Open\", t1.\"Volume\" "\
+    "FROM yfinance_any3 t1 "\
+    "where not exists (select t2.symbol "\
+                       "from crypto_tseries t2 "\
+                       "where t1.\"SYMBOL\" = t2.symbol "\
+                       "and t1.\"Datetime\" = t2.date)"
+cursor = backtest_db.cursor()
+cursor.execute(sql)
+cursor.close()
 
 
 # cursor = backtest_db.cursor()
