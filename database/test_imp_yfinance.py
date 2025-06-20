@@ -32,16 +32,13 @@ db_aktion = 'replace'
 stock_data = pyt.PyTickerSymbols()
 german_stocks = stock_data.get_stocks_by_index('DAX')
 
-for stock in german_stocks:
-    print(stock['symbol'])
-
-
-print(list(german_stocks))
 transfer_start = "2024-08-06"
 
 conn=sqlite3.connect('backtest.db')
 
-for ticker in ["MSFT", "AAPL"]:
+for stock in german_stocks:
+  ticker = stock['symbol']
+# for ticker in ["MSFT", "AAPL"]:
   start = transfer_start
   end = "2024-08-20"
  
@@ -57,9 +54,9 @@ for ticker in ["MSFT", "AAPL"]:
 
   data.columns=data.columns.get_level_values(0)
 
-  data.to_sql(tabellen_name, conn, if_exists=db_aktion)
-  #ignore_index
-  db_aktion = 'append'
+  if data.empty is False:
+     data.to_sql(tabellen_name, conn, if_exists=db_aktion)
+     db_aktion = 'append'
 
   for i  in range(3):
         start = end
@@ -72,8 +69,10 @@ for ticker in ["MSFT", "AAPL"]:
         #data = data.transpose().reset_index(drop=True).transpose()
         
         data.columns=data.columns.get_level_values(0)
-        
-        data.to_sql(tabellen_name, conn, if_exists=db_aktion)
+
+        if data.empty is False:    
+          data.to_sql(tabellen_name, conn, if_exists=db_aktion)
+          db_aktion = 'append'
 
 conn.close
 

@@ -10,3 +10,6 @@
 
 f = open("C:\BckUp\Python\myfile.txt")
 print(f.read())
+
+
+
