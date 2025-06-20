@@ -18,17 +18,18 @@ def add_days(n, d = datetime.today()):
 # print('Enter end (yyyy-mm-dd):')
 # end = input()
 
+
 check_start = "2024-08-06"
 check_end =  "2024-08-21"
 format_data = "%Y-%m-%d"
 
-
+#Check 7 Einträge pro Tag
 sql = "SELECT date(tag), symbol, count(*) "\
       "FROM crypto_tseries t1 "\
       "where date(tag) <= date('"+ check_end +"') "\
       "and date(tag) >= date('" + check_start +"') "\
       "group by date(tag), symbol "\
-      "having count(*) < 7 "
+      "having count(*) <> 7 "
 cursor = backtest_db.cursor()
 cursor.execute(sql)
 cursor.fetchone()
@@ -36,6 +37,58 @@ cursor.fetchone()
 for x in cursor:
     print(x)
 cursor.close()
+
+#Check 7 verschiede Einträge pro Tag
+sql = "SELECT date(tag), symbol, count(distinct tag) "\
+      "FROM crypto_tseries t1 "\
+      "where date(tag) <= date('"+ check_end +"') "\
+      "and date(tag) >= date('" + check_start +"') "\
+      "group by date(tag), symbol "\
+      "having count(distinct tag) <> 7 "
+cursor = backtest_db.cursor()
+cursor.execute(sql)
+cursor.fetchone()
+
+for x in cursor:
+    print(x)
+cursor.close()
+
+
+##############
+###offen Wochenende + Feiertage auslassen aus Prüfung
+#############
+
+#Check alle Tage da
+sql = "SELECT  count(distinct(date(tag))), symbol "\
+      "from crypto_tseries "\
+      "where date(tag) <= date('"+ check_end +"') "\
+      "and date(tag) >= date('" + check_start +"') "\
+      "group by symbol "\
+      "having count(distinct(date(tag))) <> 12 "
+cursor = backtest_db.cursor()
+cursor.execute(sql)
+cursor.fetchone()
+
+for x in cursor:
+    print(x)
+cursor.close()
+
+#Check mindestens ein Eintrag im Zeitraum da
+for ticker in ["MSFT", "AAPL", "DDDD"]:
+    sql = "SELECT count(*) "\
+      "from crypto_tseries "\
+      "where date(tag) <= date('"+ check_end +"') "\
+      "and date(tag) >= date('" + check_start +"') "\
+      "and symbol = \"" + ticker + "\" "\
+      "having count(*) = 0 "
+    cursor = backtest_db.cursor()
+    cursor.execute(sql)
+    cursor.fetchone()
+
+    for x in cursor:
+        print(ticker)
+    cursor.close()   
+
 
 
 # check_day= check_start
