@@ -36,9 +36,9 @@ transfer_start = "2024-08-06"
 
 conn=sqlite3.connect('backtest.db')
 
-for stock in german_stocks:
-  ticker = stock['symbol']
-# for ticker in ["MSFT", "AAPL"]:
+# for stock in german_stocks: #BNR und DTG ausschließen
+#   ticker = stock['symbol']
+for ticker in ["MSFT", "AAPL"]:
   start = transfer_start
   end = "2024-08-20"
  
@@ -58,7 +58,7 @@ for stock in german_stocks:
      data.to_sql(tabellen_name, conn, if_exists=db_aktion)
      db_aktion = 'append'
 
-  for i  in range(3):
+  for i  in range(15):
         start = end
         startdate = dt.strptime(end, format_data).date()
         startdate= add_days(1, startdate)
