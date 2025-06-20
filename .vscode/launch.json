@@ -52,6 +52,14 @@
       "console": "integratedTerminal",
       "python": "C:/Program Files/Python311/python.exe"
  }
+ {
+      "name": "Python Debug check data test",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "database.check_timeframe",
+      "console": "integratedTerminal",
+      "python": "C:/Program Files/Python311/python.exe"
+ }
 ]
 }
 

@@ -40,7 +40,7 @@ conn=sqlite3.connect('backtest.db')
 #   ticker = stock['symbol']
 for ticker in ["MSFT", "AAPL"]:
   start = transfer_start
-  end = "2024-08-20"
+  end = "2024-08-07"
  
   data = yf.download(ticker, interval=interval, period=period, start=start, end=end)
   data['SYMBOL'] = ticker
@@ -78,13 +78,13 @@ conn.close
 
 transfer_end = end
 
-sql="Insert into crypto_tseries (symbol, date,  close, high, low, open, volume) "\
+sql="Insert into crypto_tseries (symbol, tag,  close, high, low, open, volume) "\
     "select t1.\"SYMBOL\", t1.\"Datetime\", t1.\"Close\", t1.\"High\", t1.\"Low\", t1.\"Open\", t1.\"Volume\" "\
     "FROM yfinance_any3 t1 "\
     "where not exists (select t2.symbol "\
                        "from crypto_tseries t2 "\
                        "where t1.\"SYMBOL\" = t2.symbol "\
-                       "and t1.\"Datetime\" = t2.date)"
+                       "and t1.\"Datetime\" = t2.tag)"
 cursor = backtest_db.cursor()
 cursor.execute(sql)
 cursor.close()

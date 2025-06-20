@@ -16,7 +16,7 @@ backtest_db = SqliteExtDatabase(
 
 class Timeseries(peewee.Model):
     symbol = peewee.CharField()
-    date = peewee.DateTimeField()
+    tag = peewee.DateTimeField()
     open = peewee.FloatField()
     high = peewee.FloatField()
     low = peewee.FloatField()
@@ -27,11 +27,11 @@ class Timeseries(peewee.Model):
     class Meta:
         database = backtest_db
         db_table = "crypto_tseries"
-        primary_key = peewee.CompositeKey("symbol", "date")
+        primary_key = peewee.CompositeKey("symbol", "tag")
 
 
 
 
 # Recreate the table if it exists
-Timeseries.drop_table()
-Timeseries.create_table()
+#Timeseries.drop_table()
+#Timeseries.create_table()
