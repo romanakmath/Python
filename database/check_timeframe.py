@@ -1,6 +1,7 @@
 from database.get_yfinance_data import get_yfinance_data
 from datetime import datetime as dt
 import yfinance as yf
+import calendar
 import sqlite3
 import pytickersymbols as pyt
 from database.db import backtest_db, Timeseries
@@ -22,6 +23,37 @@ def add_days(n, d = datetime.today()):
 check_start = "2024-08-06"
 check_end =  "2024-08-21"
 format_data = "%Y-%m-%d"
+
+count_working_days = 0
+start_search = 0
+
+check_start_day = dt.strptime(check_start, format_data).date()
+check_end_day = dt.strptime(check_end, format_data).date()
+
+while start_search == 0:
+    
+    if check_start_day == check_end_day:
+            start_search = 1
+    weekday =calendar.day_name[check_start_day.weekday()]
+
+    working_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+
+    if weekday in working_days:
+         count_working_days += 1  
+
+    check_start_day= add_days(1, check_start_day)
+
+####### Deutschlandweite
+####### Neujahr 01.01.
+####### Karfreitag flexibel
+####### Ostermontag flexibel
+####### Christi Himmelfahrt flexibel
+####### Pfingstmontag flexibel
+####### 1. Mai
+####### 03.10.
+####### 24.12.
+####### 25.12.
+####### andere Feiertage + was ist mit 24.12. und 31.12.
 
 #Check 7 Einträge pro Tag
 sql = "SELECT date(tag), symbol, count(*) "\
@@ -64,7 +96,7 @@ sql = "SELECT  count(distinct(date(tag))), symbol "\
       "where date(tag) <= date('"+ check_end +"') "\
       "and date(tag) >= date('" + check_start +"') "\
       "group by symbol "\
-      "having count(distinct(date(tag))) <> 12 "
+      "having count(distinct(date(tag))) <>  " + str(count_working_days)
 cursor = backtest_db.cursor()
 cursor.execute(sql)
 cursor.fetchone()
@@ -91,22 +123,42 @@ cursor.close()
 #     cursor.close()   
 
 
-for ticker in ["MSFT", "AAPL", "DDDD"]:
-    sql1 = "SELECT count(*) "+\
-      "from crypto_tseries "+\
-      "where date(tag) <= date('"+ check_end +"') "+\
-      "and date(tag) >= date('" + check_start +"') "
-    sql2 = " and symbol = ':sym'  "+\
-      "having count(*) = 0 "
+# for ticker in ["MSFT", "AAPL", "DDDD"]:
+#     sql1 = "SELECT count(*) "+\
+#       "from crypto_tseries "+\
+#       "where date(tag) <= date('"+ check_end +"') "+\
+#       "and date(tag) >= date('" + check_start +"') "
+#     sql2 = " and symbol = ':sym'  "+\
+#       "having count(*) = 0 "
+for ticker in ["MSFT", "AAPL", "PSTS"]:
+
+    sql1 = (
+            "SELECT count(*) as Anz "
+            + "from crypto_tseries "
+            + "where date(tag) <= date('"
+            + check_end
+            + "') "
+            + "and date(tag) >= date('"
+            + check_start
+            + "') "
+            )
+    sql2 = " and symbol = '" + ticker + "'  " + "having count(*) = 0 "
     sql = sql1 + sql2
-    param={'sym':ticker}
+ 
+    # param={'sym':ticker}
     cursor = backtest_db.cursor()
-    cursor.execute(sql, param)
-    cursor.fetchone()
+    cursor.execute(sql)
 
     for x in cursor:
-        print(ticker)
-    cursor.close()   
+        print("Fehler Daten in Zeitraum für Ticker nicht da: " + ticker)
+    cursor.close
+
+
+    temp = cursor.fetchone()
+
+    # if temp is not None and temp[0] == 0:
+    #        print("Fehler Daten in Zeitraum für Tock nicht da" + ticker)
+
 
  #"and symbol = %s "+\
 
