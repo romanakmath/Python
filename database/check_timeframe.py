@@ -74,22 +74,41 @@ for x in cursor:
 cursor.close()
 
 #Check mindestens ein Eintrag im Zeitraum da
+# for ticker in ["MSFT", "AAPL", "DDDD"]:
+#     sql1 = "SELECT count(*) "+\
+#       "from crypto_tseries "+\
+#       "where date(tag) <= date('"+ check_end +"') "+\
+#       "and date(tag) >= date('" + check_start +"') "
+#     sql2 = "and symbol = \"" + ticker + "\" "+\
+#       "having count(*) = 0 "
+#     sql = sql1 + sql2
+#     cursor = backtest_db.cursor()
+#     cursor.execute(sql)
+#     cursor.fetchone()
+
+#     for x in cursor:
+#         print(ticker)
+#     cursor.close()   
+
+
 for ticker in ["MSFT", "AAPL", "DDDD"]:
-    sql = "SELECT count(*) "\
-      "from crypto_tseries "\
-      "where date(tag) <= date('"+ check_end +"') "\
-      "and date(tag) >= date('" + check_start +"') "\
-      "and symbol = \"" + ticker + "\" "\
+    sql1 = "SELECT count(*) "+\
+      "from crypto_tseries "+\
+      "where date(tag) <= date('"+ check_end +"') "+\
+      "and date(tag) >= date('" + check_start +"') "
+    sql2 = " and symbol = ':sym'  "+\
       "having count(*) = 0 "
+    sql = sql1 + sql2
+    param={'sym':ticker}
     cursor = backtest_db.cursor()
-    cursor.execute(sql)
+    cursor.execute(sql, param)
     cursor.fetchone()
 
     for x in cursor:
         print(ticker)
     cursor.close()   
 
-
+ #"and symbol = %s "+\
 
 # check_day= check_start
 # do_loop = True
