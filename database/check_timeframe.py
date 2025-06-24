@@ -5,6 +5,7 @@ import calendar
 import sqlite3
 import pytickersymbols as pyt
 from database.db import backtest_db, Timeseries
+import pandas as pd
 
 from datetime import datetime, timedelta
 
@@ -160,6 +161,61 @@ if count_working_days > 0:
 
 
         temp = cursor.fetchone()
+
+        cursor.close
+
+
+if count_working_days > 0:
+    for ticker in ["MSFT", "AAPL", "PSTS"]:
+
+        start_search = 0
+        check_start_day = dt.strptime(check_start, format_data).date()
+        check_end_day = dt.strptime(check_end, format_data).date()
+
+        while start_search == 0:
+            if check_start_day == check_end_day:
+                    start_search = 1
+
+            is_holidays_fix = check_start_day.strftime("%m-%d") in holidays_fix
+            is_holidays_flex  = check_start_day.strftime("%Y-%m-%d") in holidays_flex
+            is_weekday =calendar.day_name[check_start_day.weekday()] in working_days
+
+            if is_weekday and not is_holidays_fix and not is_holidays_flex:
+                akt_tag = check_start_day.strftime("%Y-%m-%d") 
+
+                sql1 = (
+                    "SELECT count(*) as Anz "
+                    + "from crypto_tseries "
+                    + "where date(tag) = date('"
+                    + akt_tag
+                    + "') "
+                    )
+                sql2 = " and symbol = '" + ticker + "'  " + "having count(*) = 0 "
+                sql = sql1 + sql2
+        
+                # param={'sym':ticker}
+                cursor = backtest_db.cursor()
+                cursor.execute(sql)
+
+                for x in cursor:
+                    missing_day =  check_start_day.strftime("%Y-%m-%d")
+                    print("Fehler Daten in Zeitraum für Ticker nicht da: " + ticker + ' Tag: ' + missing_day)
+                cursor.close
+
+
+                temp = cursor.fetchone()
+
+                cursor.close
+                
+            check_start_day= add_days(1, check_start_day)
+
+
+# sql = "select * from crypto_tseries"
+# cursor = backtest_db.cursor()
+# df = pd.read_sql()
+
+# cursor.close
+
 
     # if temp is not None and temp[0] == 0:
     #        print("Fehler Daten in Zeitraum für Tock nicht da" + ticker)
