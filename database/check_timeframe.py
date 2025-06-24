@@ -23,6 +23,14 @@ def add_days(n, d = datetime.today()):
 check_start = "2024-08-06"
 check_end =  "2024-08-21"
 format_data = "%Y-%m-%d"
+working_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+holidays_fix = ["01-01", "05-01", "10-03", "12-25", "12-26"]
+holidays_flex = ["2025-04-18", "2025-04-21", "2025-05-29", "2025-06-09",
+                 "2024-03-29", "2024-04-01", "2024-05-09", "2024-05-20",
+                 "2023-04-07", "2023-04-10", "2023-05-18", "2023-05-29",
+                 "2022-04-15", "2022-04-18", "2022-05-26", "2022-06-06",
+                 "2021-04-02", "2021-04-05", "2021-05-13", "2021-05-24"
+                ]
 
 count_working_days = 0
 start_search = 0
@@ -31,14 +39,15 @@ check_start_day = dt.strptime(check_start, format_data).date()
 check_end_day = dt.strptime(check_end, format_data).date()
 
 while start_search == 0:
-    
+   
     if check_start_day == check_end_day:
             start_search = 1
-    weekday =calendar.day_name[check_start_day.weekday()]
+    
+    is_holidays_fix = check_start_day.strftime("%m-%d") in holidays_fix
+    is_holidays_flex  = check_start_day.strftime("%Y-%m-%d") in holidays_flex
+    is_weekday =calendar.day_name[check_start_day.weekday()] in working_days
 
-    working_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
-
-    if weekday in working_days:
+    if is_weekday and not is_holidays_fix and not is_holidays_flex:
          count_working_days += 1  
 
     check_start_day= add_days(1, check_start_day)
@@ -51,8 +60,7 @@ while start_search == 0:
 ####### Pfingstmontag flexibel
 ####### 1. Mai
 ####### 03.10.
-####### 24.12.
-####### 25.12.
+####### 25.12. + 26.12.
 ####### andere Feiertage + was ist mit 24.12. und 31.12.
 
 #Check 7 Einträge pro Tag
@@ -84,11 +92,6 @@ cursor.fetchone()
 for x in cursor:
     print(x)
 cursor.close()
-
-
-##############
-###offen Wochenende + Feiertage auslassen aus Prüfung
-#############
 
 #Check alle Tage da
 sql = "SELECT  count(distinct(date(tag))), symbol "\
@@ -130,31 +133,33 @@ cursor.close()
 #       "and date(tag) >= date('" + check_start +"') "
 #     sql2 = " and symbol = ':sym'  "+\
 #       "having count(*) = 0 "
-for ticker in ["MSFT", "AAPL", "PSTS"]:
 
-    sql1 = (
-            "SELECT count(*) as Anz "
-            + "from crypto_tseries "
-            + "where date(tag) <= date('"
-            + check_end
-            + "') "
-            + "and date(tag) >= date('"
-            + check_start
-            + "') "
-            )
-    sql2 = " and symbol = '" + ticker + "'  " + "having count(*) = 0 "
-    sql = sql1 + sql2
- 
-    # param={'sym':ticker}
-    cursor = backtest_db.cursor()
-    cursor.execute(sql)
+if count_working_days > 0:
+    for ticker in ["MSFT", "AAPL", "PSTS"]:
 
-    for x in cursor:
-        print("Fehler Daten in Zeitraum für Ticker nicht da: " + ticker)
-    cursor.close
+        sql1 = (
+                "SELECT count(*) as Anz "
+                + "from crypto_tseries "
+                + "where date(tag) <= date('"
+                + check_end
+                + "') "
+                + "and date(tag) >= date('"
+                + check_start
+                + "') "
+                )
+        sql2 = " and symbol = '" + ticker + "'  " + "having count(*) = 0 "
+        sql = sql1 + sql2
+    
+        # param={'sym':ticker}
+        cursor = backtest_db.cursor()
+        cursor.execute(sql)
+
+        for x in cursor:
+            print("Fehler Daten in Zeitraum für Ticker nicht da: " + ticker)
+        cursor.close
 
 
-    temp = cursor.fetchone()
+        temp = cursor.fetchone()
 
     # if temp is not None and temp[0] == 0:
     #        print("Fehler Daten in Zeitraum für Tock nicht da" + ticker)
