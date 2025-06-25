@@ -7,7 +7,6 @@ import pytickersymbols as pyt
 from database.db import backtest_db, Timeseries
 import pandas as pd
 from sqlite3 import connect
-from time import sleep
 
 from datetime import datetime, timedelta
 
@@ -17,8 +16,6 @@ from database.check_timeframe import check_data
 from database.test_imp_yfinance import imp_yfinance
 
 import matplotlib.pyplot as plt
-from lightweight_charts import Chart
-import mplfinance as mpf
 
 # print('Enter start (yyyy-mm-dd):')
 # check_start = input()
@@ -27,32 +24,39 @@ import mplfinance as mpf
 # check_end = input()
 
 
-check_start = "2024-08-06"
-check_end =  "2024-08-21"
-Check_OK = True
-
-Check_OK = check_data(check_start, check_end)
-
-sql = "select symbol, tag as date, open, high, low, close, volume from crypto_tseries "\
-      "where date(tag) <= date('"+ check_end +"') "\
-      "and date(tag) >= date('" + check_start +"') "\
-      "and  symbol = \'MSFT\' "
-conn =  connect("backtest.db")
-
-if Check_OK:
-    df = pd.read_sql(sql, conn)
-else:  
-    imp_yfinance(check_start, check_end)   
-    
+def get_data_from_sql(start_dt, end_dt):
+    check_start = start_dt
+    check_end = end_dt
     Check_OK = True
+
     Check_OK = check_data(check_start, check_end)
+
+    sql = (
+        "select * from crypto_tseries "
+        "where date(tag) <= date('" + check_end + "') "
+        "and date(tag) >= date('" + check_start + "') "
+    )
+    conn = connect("backtest.db")
 
     if Check_OK:
         df = pd.read_sql(sql, conn)
+        conn.close()
+        return df
     else:
-        print("Daten in yFinance unvollständig")
+        # If data is not available in the database, fetch from yFinance and insert into the database
+        imp_yfinance(check_start, check_end)
 
-conn.close()
+        Check_OK = True
+        Check_OK = check_data(check_start, check_end)
+
+        if Check_OK:
+            df = pd.read_sql(sql, conn)
+            conn.close()
+            return df
+        else:
+            print("Daten in yFinance unvollständig")
+
+    conn.close()
 
 # df.plot(kind = 'scatter', x = 'date', y = 'open')
 # plt.show()
@@ -72,14 +76,14 @@ conn.close()
 #          ylabel='Price')
 
 
-data = {
-     'Open': df['open'],
-     'High':  df['high'],
-     'Low':  df['low'],
-     'Close':  df['close']
-}
+# data = {
+#      'Open': df['open'],
+#      'High':  df['high'],
+#      'Low':  df['low'],
+#      'Close':  df['close']
+# }
 
-time_index = pd.DatetimeIndex(df['date'])
+# time_index = pd.DatetimeIndex(df['date'])
 
 
 
@@ -101,11 +105,11 @@ time_index = pd.DatetimeIndex(df['date'])
 # ])
 
 
-# Create a DataFrame with the OHLC data and the time index
-df2 = pd.DataFrame(data, index=time_index)
-print(df2)
+# # Create a DataFrame with the OHLC data and the time index
+# df2 = pd.DataFrame(data, index=time_index)
+# print(df2)
 
-# Configure and plot the candlestick chart
-mpf.plot(df2, type='candle', style='yahoo',
-         title='Sample Candlestick Chart',
-         ylabel='Price')
+# # Configure and plot the candlestick chart
+# mpf.plot(df2, type='candle', style='yahoo',
+#          title='Sample Candlestick Chart',
+#          ylabel='Price')
