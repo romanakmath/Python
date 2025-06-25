@@ -2,9 +2,11 @@ import yfinance as yf
 import sqlite3 
 import pandas as pd
 from datetime import datetime, timedelta
+from pytickersymbols import PyTickerSymbols
 
 
 
+# print(list(nasdaq_tickers))
 # ticker= "MSFT"
 # interval= "1m"
 # period= "5d"
@@ -16,14 +18,23 @@ from datetime import datetime, timedelta
 
 #schleife erstellen jeweils 7 Tage bis ende des Jahres. Eine Tabelle komplette Tabelle erstellen( concat oder extend). Überprüfen, ob SQL light fähig ist eine immense Zahl an Daten aufzunehmen. 
 
+# stock_data = PyTickerSymbols()
+# DAX_tickers = stock_data.get_stocks_by_index('DAX')
 
+# for stock in DAX_tickers:
+#     ticker =stock["symbol"]
+url='https://en.wikipedia.org/wiki/List_of_S%26P_500_companies' 
+tabelle_url=pd.read_html(url)[0]
 
-ticker=["MSFT" , "NVDA"]
-interval= "1m"
+ticker=tabelle_url['Symbol'].tolist()
+interval= "1d"
 days_periode= 7
-total_days= 30
+total_days= 7
 enddate= datetime.today()
 startdate= enddate - timedelta(days = total_days)  #datetime - ein genauer Zeitstempel (Datum), timedelta – eine Zeitspanne, z. B. "7 Tage" oder "3 Stunden"
+
+
+
 
 # startdate_temp= datetime.strptime(startdatestr,"%Y-%m-%d").date()
 # enddate_temp= datetime.strptime(enddatestr,"%Y-%m-%d").date()
@@ -33,33 +44,44 @@ tabstart= [startdate + timedelta(days=days_interval)
 
 
 tabrahmen=[]
-for tabstartzeit in tabstart:
-    tabendzeit= min(tabstartzeit + timedelta(days=days_periode),enddate)
+for symbol in ticker:
+    for tabstartzeit in tabstart:
+        tabendzeit= min(tabstartzeit + timedelta(days=days_periode),enddate)
     
-    startdatestr= tabstartzeit.strftime("%Y-%m-%d")
-    enddatestr= tabendzeit.strftime("%Y-%m-%d")
+        startdatestr= tabstartzeit.strftime("%Y-%m-%d")
+        enddatestr= tabendzeit.strftime("%Y-%m-%d")
 
-    data = yf.download(ticker, interval=interval, start=tabstartzeit, end=tabendzeit, group_by="column")
+
+        data = yf.download(symbol, interval=interval, start=tabstartzeit, end=tabendzeit)
+        # if isinstance(data.columns, pd.MultiIndex):
+        data.columns = data.columns.get_level_values(0) #MultiIndex flatten
+
+        data=data.reset_index() #Hier wird der Index (Datetime) zu einer normalen Spalte 'Datetime'
     
-    
-    data=data.reset_index() #Hier wird der Index (Datetime) zu einer normalen Spalte 'Datetime'
-    data["SYMBOL"] = ticker
+        data['symbol'] = symbol
     # data_temp= data.index
     # date_temo_0= data.index[0] #.strptime("%Y-%m-&d")'
     # data["Datum"] = data.index
-    tabrahmen.append(data)
+        tabrahmen.append(data)
     
 
-volletab=pd.concat(tabrahmen, ignore_index=True) #index datetimeindex wird von pandas nicht als normale Spalte mitgenommen.
-volletab.columns=volletab.columns.get_level_values(0)#MultiIndex flatten
+# print(data.head())
+# print(data.columns)
+# print(type(data))
 
-print(volletab.head())
-print(volletab.columns)
-print(type(volletab))
+volletab=pd.concat(tabrahmen, ignore_index=True) #index datetimeindex wird von pandas nicht als normale Spalte mitgenommen.
+#volletab.columns = volletab.columns.get_level_values(0) #MultiIndex flatten
+
+# print(volletab.head())
+# print(volletab.columns)
+# print(type(volletab))
 
 conn=sqlite3.connect('backtest.db')
 volletab.to_sql('test_ahm_temp_2', conn, if_exists='replace', index=False)
 
+
+
+#qualität der daten prüfen.
 
 
 
