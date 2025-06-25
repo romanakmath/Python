@@ -8,6 +8,7 @@ end_dt =dt.datetime(2024, 8, 26)
 time_points = {"start": start_dt, "end": end_dt}
 
 needed_data = get_data_from_sql(start_dt, end_dt)
+print(needed_data)
 plot_data("MSFT", needed_data, **time_points)
 
 # prediction = analyze_data(needed_data, time_points)

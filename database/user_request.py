@@ -25,8 +25,9 @@ import matplotlib.pyplot as plt
 
 
 def get_data_from_sql(start_dt, end_dt):
-    check_start = start_dt
-    check_end = end_dt
+    format_data = "%Y-%m-%d"
+    check_start = start_dt.strftime(format_data)
+    check_end = end_dt.strftime(format_data)
     Check_OK = True
 
     Check_OK = check_data(check_start, check_end)
