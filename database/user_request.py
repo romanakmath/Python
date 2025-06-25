@@ -33,9 +33,10 @@ def get_data_from_sql(start_dt, end_dt):
     Check_OK = check_data(check_start, check_end)
 
     sql = (
-        "select * from crypto_tseries "
+        "select symbol, tag as date, open, high, low, close, volume from crypto_tseries "
         "where date(tag) <= date('" + check_end + "') "
         "and date(tag) >= date('" + check_start + "') "
+        "and symbol = \'MSFT\' "
     )
     conn = connect("backtest.db")
 
