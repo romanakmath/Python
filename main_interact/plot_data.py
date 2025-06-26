@@ -10,13 +10,6 @@ def plot_data(symbol, data_df, **time_points):
     start_point = time_points["start"]
     end_point = time_points["end"]
     
-    # data_df.plot(kind="scatter", x="date", y="open")
-    # plt.show()
-
-    temp =  data_df['open']
-    temp2= list(data_df['open'])
-
-
     data = {
      'Open': list(data_df['open']),
      'High': list(data_df['high']),
