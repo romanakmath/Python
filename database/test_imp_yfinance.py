@@ -9,91 +9,102 @@ from datetime import datetime, timedelta
 
 from database.insert_db import ins_data
 
-def  imp_yfinance(start_d, end_d):
-  def add_days(n, d = datetime.today()):
-    return d + timedelta(n)
 
-  #start = "2024-08-01"
-  #end = "2024-08-02"
-  #format_data = "%d.%m.%Y"
-  #startdate = dt.strptime(startPoint, format_data)
-  #enddate = dt.strptime(endPoint, format_data)
-  #get_yfinance_data(symbol, interval= interval, period= period)
-  #start = dt.strptime(f"{startPoint}";, "%Y-%m-%d")  # Avoids leap year bug.
-  #end  = dt.strptime(f"{endPoint}";, "%Y-%m-%d")  # Avoids leap year bug.
+def imp_yfinance(start_d, end_d):
+    def add_days(n, d=datetime.today()):
+        return d + timedelta(n)
 
-  format_data = "%Y-%m-%d"
+    # start = "2024-08-01"
+    # end = "2024-08-02"
+    # format_data = "%d.%m.%Y"
+    # startdate = dt.strptime(startPoint, format_data)
+    # enddate = dt.strptime(endPoint, format_data)
+    # get_yfinance_data(symbol, interval= interval, period= period)
+    # start = dt.strptime(f"{startPoint}";, "%Y-%m-%d")  # Avoids leap year bug.
+    # end  = dt.strptime(f"{endPoint}";, "%Y-%m-%d")  # Avoids leap year bug.
 
-  interval= "60m"
-  period= "1d"
-  tabellen_name = 'yfinance_any3'
-  #db_aktion = 'append'
-  db_aktion = 'replace'
+    format_data = "%Y-%m-%d"
 
-  stock_data = pyt.PyTickerSymbols()
-  german_stocks = stock_data.get_stocks_by_index('DAX')
+    interval = "60m"
+    period = "1d"
+    tabellen_name = "yfinance_any3"
+    # db_aktion = 'append'
+    db_aktion = "replace"
 
-  transfer_start = start_d
+    stock_data = pyt.PyTickerSymbols()
+    german_stocks = stock_data.get_stocks_by_index("DAX")
 
-  conn=sqlite3.connect('backtest.db')
+    transfer_start = start_d
 
-  # for stock in german_stocks: #BNR und DTG ausschließen
-  #   ticker = stock['symbol']
-  for ticker in ["MSFT", "AAPL"]:
-    start = transfer_start
-    end = end_d
-  
-    data = yf.download(ticker, interval=interval, period=period, start=start, end=end)
-    data['SYMBOL'] = ticker
-    
-    #ins_data(data, ticker)
+    conn = sqlite3.connect("backtest.db")
 
-    #data = data.transpose().reset_index(drop=True).transpose()
+    # for stock in german_stocks: #BNR und DTG ausschließen
+    #   ticker = stock['symbol']
+    for ticker in ["MSFT", "AAPL"]:
+        start = transfer_start
+        end = end_d
 
-    # columns = ['Close', 'Open']
-    # new_df = DataFrame()
+        data = yf.download(
+            ticker, interval=interval, period=period, start=start, end=end
+        )
+        data["SYMBOL"] = ticker
 
-    data.columns=data.columns.get_level_values(0)
+        # ins_data(data, ticker)
 
-    if data.empty is False:
-      data.to_sql(tabellen_name, conn, if_exists=db_aktion)
-      db_aktion = 'append'
+        # data = data.transpose().reset_index(drop=True).transpose()
 
-    for i  in range(15):
-          start = end
-          startdate = dt.strptime(end, format_data).date()
-          startdate= add_days(1, startdate)
-          end= dt.strftime(startdate, format_data)
-          data = yf.download(ticker, interval=interval, period=period, start=start, end=end)
-          data['SYMBOL'] = ticker
+        # columns = ['Close', 'Open']
+        # new_df = DataFrame()
 
-          #data = data.transpose().reset_index(drop=True).transpose()
-          
-          data.columns=data.columns.get_level_values(0)
+        data.columns = data.columns.get_level_values(0)
 
-          if data.empty is False:    
+        if data.empty is False:
             data.to_sql(tabellen_name, conn, if_exists=db_aktion)
-            db_aktion = 'append'
+            db_aktion = "append"
 
-  conn.close
+        startdate_temp = datetime.strptime(start_d, "%Y-%m-%d").date()
+        enddate_temp = datetime.strptime(end_d, "%Y-%m-%d").date()
 
-  transfer_end = end
+        days_difference = (enddate_temp - startdate_temp).days
 
-  sql="Insert into crypto_tseries (symbol, tag,  close, high, low, open, volume) "\
-      "select t1.\"SYMBOL\", t1.\"Datetime\", t1.\"Close\", t1.\"High\", t1.\"Low\", t1.\"Open\", t1.\"Volume\" "\
-      "FROM yfinance_any3 t1 "\
-      "where not exists (select t2.symbol "\
-                        "from crypto_tseries t2 "\
-                        "where t1.\"SYMBOL\" = t2.symbol "\
-                        "and t1.\"Datetime\" = t2.tag)"
-  cursor = backtest_db.cursor()
-  cursor.execute(sql)
-  cursor.close()
+        for i in range(days_difference):
+            start = end
+            startdate = dt.strptime(end, format_data).date()
+            startdate = add_days(1, startdate)
+            end = dt.strftime(startdate, format_data)
+            data = yf.download(
+                ticker, interval=interval, period=period, start=start, end=end
+            )
+            data["SYMBOL"] = ticker
 
+            # data = data.transpose().reset_index(drop=True).transpose()
 
-  # cursor = backtest_db.cursor()
-  # sql="delete from test_ahm where symbol in (""MSFT"", ""AAPL"")"
-  # cursor.execute(sql)
-  # sql="insert into test_ahm select * from yfinance_any3"
-  # cursor.execute(sql)
-  # cursor.close()
+            data.columns = data.columns.get_level_values(0)
+
+            if data.empty is False:
+                data.to_sql(tabellen_name, conn, if_exists=db_aktion)
+                db_aktion = "append"
+
+    conn.close
+
+    transfer_end = end
+
+    sql = (
+        "Insert into crypto_tseries (symbol, tag,  close, high, low, open, volume) "
+        'select t1."SYMBOL", t1."Datetime", t1."Close", t1."High", t1."Low", t1."Open", t1."Volume" '
+        "FROM yfinance_any3 t1 "
+        "where not exists (select t2.symbol "
+        "from crypto_tseries t2 "
+        'where t1."SYMBOL" = t2.symbol '
+        'and t1."Datetime" = t2.tag)'
+    )
+    cursor = backtest_db.cursor()
+    cursor.execute(sql)
+    cursor.close()
+
+    # cursor = backtest_db.cursor()
+    # sql="delete from test_ahm where symbol in (""MSFT"", ""AAPL"")"
+    # cursor.execute(sql)
+    # sql="insert into test_ahm select * from yfinance_any3"
+    # cursor.execute(sql)
+    # cursor.close()

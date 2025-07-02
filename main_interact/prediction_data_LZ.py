@@ -14,6 +14,7 @@ import statsmodels.api as sm
 from advanced_ta import LorentzianClassification
 from ta.volume import money_flow_index as MFI
 
+
 def analyze_data_Lorentzian(df2, time_points):
     # openname="open"
     # date=pd.DataFrame(needed_data,columns=["date"])
@@ -23,8 +24,8 @@ def analyze_data_Lorentzian(df2, time_points):
     # open=open.reset_index(drop=True)
     # df=pd.concat([date,open],axis=1)
 
-    df = df2.drop('symbol', axis=1)
-
+    df = df2.drop("symbol", axis=1)
+    df.set_index("date", inplace=True)
 
     lc = LorentzianClassification(
         df,
@@ -33,28 +34,36 @@ def analyze_data_Lorentzian(df2, time_points):
             LorentzianClassification.Feature("WT", 10, 11),  # f2
             LorentzianClassification.Feature("CCI", 20, 2),  # f3
             LorentzianClassification.Feature("ADX", 20, 2),  # f4
-            LorentzianClassification.Feature("RSI", 9, 2),   # f5
-            MFI(df['high'], df['low'], df['close'], df['volume'], 14) #f6
+            LorentzianClassification.Feature("RSI", 9, 2),  # f5
+            # MFI(
+            #     df["open"], df["high"], df["low"], df["close"], df["volume"], 14
+            # ),  #
+            MFI(df["high"], df["low"], df["close"], df["volume"], 14),  # f6
         ],
         settings=LorentzianClassification.Settings(
-            source='close',
+            source=df["close"],
             neighborsCount=8,
             maxBarsBack=2000,
-            useDynamicExits=False
+            useDynamicExits=False,
         ),
+        # source = 'close',
         filterSettings=LorentzianClassification.FilterSettings(
             useVolatilityFilter=True,
             useRegimeFilter=True,
             useAdxFilter=False,
             regimeThreshold=-0.1,
             adxThreshold=20,
-            kernelFilter = LorentzianClassification.KernelFilter(
-                useKernelSmoothing = False,
-                lookbackWindow = 8,
-                relativeWeight = 8.0,
-                regressionLevel = 25,
-                crossoverLag = 2)
-        )
+            kernelFilter=LorentzianClassification.KernelFilter(
+                useKernelSmoothing=False,
+                lookbackWindow=8,
+                relativeWeight=8.0,
+                regressionLevel=25,
+                crossoverLag=2,
+            ),
+        ),
     )
-    #lc.dump('output/result.csv')
-    lc.plot('output/result.jpg')
+
+    # print(lc.yhat1)
+    print(max(lc.df.prediction))
+    # lc.dump('output/result.csv')
+    lc.plot("output/result.jpg")

@@ -36,7 +36,7 @@ def get_data_from_sql(start_dt, end_dt):
         "select symbol, tag as date, open, high, low, close, volume from crypto_tseries "
         "where date(tag) <= date('" + check_end + "') "
         "and date(tag) >= date('" + check_start + "') "
-        "and symbol = \'MSFT\' "
+        "and symbol = 'AAPL' "
     )
     conn = connect("backtest.db")
 
@@ -59,6 +59,7 @@ def get_data_from_sql(start_dt, end_dt):
             print("Daten in yFinance unvollständig")
 
     conn.close()
+
 
 # df.plot(kind = 'scatter', x = 'date', y = 'open')
 # plt.show()
@@ -88,14 +89,12 @@ def get_data_from_sql(start_dt, end_dt):
 # time_index = pd.DatetimeIndex(df['date'])
 
 
-
 # data = {
 #      'Open': [10, 15, 14, 12, 13],
 #      'High': [15, 16, 15, 14, 14],
 #      'Low': [9, 12, 13, 11, 12],
 #      'Close': [12, 14, 13, 13, 14]
 # }
-
 
 
 # time_index = pd.DatetimeIndex([
